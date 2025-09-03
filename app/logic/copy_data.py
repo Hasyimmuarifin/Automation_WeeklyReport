@@ -82,7 +82,7 @@ def copy_column_data(ws_src, ws_out, week_key, col_map, col_output_index, label)
     print(f"{label} Week '{week_key}' (column {col_letter}) successfully copied to the index column {col_output_index}.")
 
 # Function to copy total values and convert them to negative
-def copy_total_value(ws_src, ws_out, week_key, col_map, output_col_index, label, offset):
+def copy_total_value(ws_src, ws_out, week_key, col_map, output_col_index, label, source_type):
     """
     Copy total values from the source worksheet to the output worksheet and convert them to negative.
 
@@ -93,15 +93,22 @@ def copy_total_value(ws_src, ws_out, week_key, col_map, output_col_index, label,
         col_map (dict): Mapping of week keys to column letters.
         output_col_index (int): The column index in the output worksheet to copy the total value to.
         label (str): A label for logging purposes.
-        offset (int): The row offset to locate the total value.
+        source_type (str): Either 'boct' or 'mahakam' to determine which row index to use.
     """
     # Validate if the week key exists in the column mapping
     if week_key not in col_map:
         raise ValueError(f"{label}: Week '{week_key}' not valid.")
     
-    # Get the column letter for the week and calculate the row number for total value
+    # Get the column letter for the week
     col_letter = col_map[week_key]
-    row_index = header_row + offset + max_row
+
+    # Hitung row_index berdasarkan tipe sumber (boct atau mahakam)
+    if source_type.lower() == "boct":
+        row_index = header_row + max_row + (100 - max_row) + 3
+    elif source_type.lower() == "mahakam":
+        row_index = header_row + max_row + (100 - max_row) + 4
+    else:
+        raise ValueError(f"{label}: source_type must be 'boct' or 'mahakam'.")
 
     # Read the value from the source worksheet
     value = ws_src[f"{col_letter}{row_index}"].value
@@ -157,16 +164,16 @@ def main():
     copy_column_data(ws_source, ws_output, selected_week, week_column_map_demurrage, 89, "Demurrage")
 
     # Copy total Penalty BOCT to column 94 (CP)
-    copy_total_value(ws_source, ws_output, selected_week, week_column_map_penalty, 94, "Penalty BOCT", offset=3)
+    copy_total_value(ws_source, ws_output, selected_week, week_column_map_penalty, 94, "Penalty BOCT", source_type="boct")
 
     # Copy total Penalty Mahakam to column 95 (CQ)
-    copy_total_value(ws_source, ws_output, selected_week, week_column_map_penalty, 95, "Penalty Mahakam", offset=4)
+    copy_total_value(ws_source, ws_output, selected_week, week_column_map_penalty, 95, "Penalty Mahakam", source_type="mahakam")
 
     # Copy total Demurrage BOCT to column 96 (CR)
-    copy_total_value(ws_source, ws_output, selected_week, week_column_map_demurrage, 96, "Demurrage BOCT", offset=3)
+    copy_total_value(ws_source, ws_output, selected_week, week_column_map_demurrage, 96, "Demurrage BOCT", source_type="boct")
 
     # Copy total Demurrage Mahakam to column 97 (CS)
-    copy_total_value(ws_source, ws_output, selected_week, week_column_map_demurrage, 97, "Demurrage Mahakam", offset=4)
+    copy_total_value(ws_source, ws_output, selected_week, week_column_map_demurrage, 97, "Demurrage Mahakam", source_type="mahakam")
 
     # Save the output workbook with the applied changes
     wb_output.save(output_file)
