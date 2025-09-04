@@ -32,8 +32,8 @@ data_final_path = json_data["final_file"]
 data_summary_file = json_data["summary_file"]
 
 # Read data from the summary Excel file, specifically from the 'ITM Summary' sheet
-# Start reading from the specified header row for month 4
-data_summary = pd.read_excel(data_summary_file, sheet_name='ITM Summary', header=json_data["header_month4"])
+# Start reading from the specified header row for month 5
+data_summary = pd.read_excel(data_summary_file, sheet_name='ITM Summary', header=json_data["header_month5"])
 
 # Clean up column names by stripping excess whitespace
 data_summary.columns = data_summary.columns.str.strip()
@@ -43,7 +43,7 @@ print("Column names in file B:", data_summary.columns.tolist())
 
 # Load the workbook from the final data file
 wb = openpyxl.load_workbook(data_final_path)
-ws = wb['Month 4']  # Change to the appropriate sheet name as needed
+ws = wb['Month 5']  # Change to the appropriate sheet name as needed
 
 # Column Mapping
 columns_to_update = {
@@ -77,7 +77,7 @@ columns_to_update = {
 # Fill in data in the final Excel file from the summary data
 start_row = 4  # The first row to write data in the final file
 num_rows_b = len(data_summary)  # Number of data rows in the summary file
-data_count = start_row + json_data["data_count_month4"]  # Maximum rows to fill, calculated from config
+data_count = start_row + json_data["data_count_month5"]  # Maximum rows to fill, calculated from config
 
 # Loop through each column and each row to transfer data
 for column_name, excel_column in columns_to_update.items():
@@ -159,7 +159,7 @@ print("The columns have been successfully updated and saved back to the same fil
 
 # Main function to encapsulate logic if needed
 def main():
-    print("month 4 processing")
+    print("month 5 processing")
 
 # Run main() if this script is executed directly
 if __name__ == "__main__":

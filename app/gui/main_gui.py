@@ -115,6 +115,14 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.checkBox_enableMonth4.toggled.connect(self.toggle_month4_spinboxes)
         self.toggle_month4_spinboxes()
 
+        # Connect checkbox to SpinBox for month 4
+        self.checkBox_enableMonth5.toggled.connect(self.toggle_month5_spinboxes)
+        self.toggle_month5_spinboxes()
+
+        # Connect checkbox to SpinBox for month 4
+        self.checkBox_enableMonth6.toggled.connect(self.toggle_month6_spinboxes)
+        self.toggle_month6_spinboxes()
+
         # Ensure the Home button is checked and the corresponding page is active
         self.switch_page(self.page_1, self.pushButton_Home)
 
@@ -141,6 +149,18 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.spinBox_headerMonth4.setEnabled(is_checked)
         self.spinBox_dataCountMonth4.setEnabled(is_checked)
 
+    # Toggle enabling/disabling spinboxes for month 5
+    def toggle_month5_spinboxes(self):
+        is_checked = self.checkBox_enableMonth5.isChecked()
+        self.spinBox_headerMonth5.setEnabled(is_checked)
+        self.spinBox_dataCountMonth5.setEnabled(is_checked)
+
+    # Toggle enabling/disabling spinboxes for month 6
+    def toggle_month6_spinboxes(self):
+        is_checked = self.checkBox_enableMonth6.isChecked()
+        self.spinBox_headerMonth6.setEnabled(is_checked)
+        self.spinBox_dataCountMonth6.setEnabled(is_checked)
+
     # Browse summary input file
     def browse_summary_file(self):
         path, _ = QFileDialog.getOpenFileName(self, "Select Source File", "", "Excel (*.xlsx)")
@@ -165,10 +185,14 @@ class MyApp(QMainWindow, Ui_MainWindow):
                 "header_month2": int(self.spinBox_headerMonth2.value()),
                 "header_month3": int(self.spinBox_headerMonth3.value()),
                 "header_month4": int(self.spinBox_headerMonth4.value()) if self.checkBox_enableMonth4.isChecked() else 0,
+                "header_month5": int(self.spinBox_headerMonth5.value()) if self.checkBox_enableMonth5.isChecked() else 0,
+                "header_month6": int(self.spinBox_headerMonth6.value()) if self.checkBox_enableMonth6.isChecked() else 0,
                 "data_count_month1": int(self.spinBox_dataCountMonth1.value()),
                 "data_count_month2": int(self.spinBox_dataCountMonth2.value()),
                 "data_count_month3": int(self.spinBox_dataCountMonth3.value()),
                 "data_count_month4": int(self.spinBox_dataCountMonth4.value()) if self.checkBox_enableMonth4.isChecked() else 0,
+                "data_count_month5": int(self.spinBox_dataCountMonth5.value()) if self.checkBox_enableMonth5.isChecked() else 0,
+                "data_count_month6": int(self.spinBox_dataCountMonth6.value()) if self.checkBox_enableMonth6.isChecked() else 0,
                 "selected_week": self.comboBox_week.currentText()
             }
         except ValueError:

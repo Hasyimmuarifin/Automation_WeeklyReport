@@ -13,6 +13,8 @@ import month_1
 import month_2
 import month_3
 import month_4
+import month_5
+import month_6
 import save  # Import the save module for saving the final output
 
 def run_step(func, label: str) -> None:
@@ -65,6 +67,8 @@ if __name__ == "__main__":
         ("data_count_month2", month_2, "Process month 2"),
         ("data_count_month3", month_3, "Process month 3"),
         ("data_count_month4", month_4, "Process month 4"),
+        ("data_count_month5", month_5, "Process month 5"),
+        ("data_count_month6", month_6, "Process month 6"),
     ]
 
     # Iterate through each month and run the corresponding module if data is available
