@@ -91,7 +91,7 @@ QPushButton#btn_final {
 }
 
 QPushButton#pushButton_submit {
-    background-color: rgb(117, 146, 177);
+    background-color: rgba(19, 165, 0, 1);
     color: white;
     border-radius: 10px;
     font-size: 20px;
