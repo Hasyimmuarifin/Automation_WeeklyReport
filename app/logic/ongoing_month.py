@@ -61,136 +61,132 @@ columns_to_update = {
 }
 
 start_row = 4
-data_count = start_row + json_data["data_count_month1"]
+end_row = start_row + json_data["data_count_month1"] - 1
 
 # ======== Fill standard columns ========
-for column_name, excel_column in columns_to_update.items():
-    for index in range(start_row - 4, data_count - 3):
-        try:
-            ws[f'{excel_column}{start_row + index}'] = data_summary[column_name].iloc[index]
-        except KeyError:
-            print(f"Column '{column_name}' not found in file B.")
-        except IndexError:
-            print(f"Insufficient data in column '{column_name}' for index {index}.")
+for col_name, excel_col in columns_to_update.items():
+    if col_name not in data_summary.columns:
+        print(f"⚠️ Column '{col_name}' not found in file B.")
+        continue
+
+    for i, value in enumerate(data_summary[col_name].iloc[: end_row - start_row + 1]):
+        ws[f"{excel_col}{start_row + i}"] = value
 
 # ======== Format date function ========
 def convert_to_date_format(date_value):
+    """Convert date ke format 'd.Mmm' (contoh: 5.Sep)."""
     try:
-        if isinstance(date_value, str) and '/' in date_value:
-            day, month = date_value.split('/')
-            date_converted = pd.to_datetime(f'2024-{month}-{day}', format='%Y-%m-%d')
+        if pd.isna(date_value):
+            return None
+
+        if isinstance(date_value, str):
+            # Format dd/mm
+            if '/' in date_value:
+                day, month = date_value.split('/')
+                date_converted = pd.to_datetime(
+                    f"2024-{month}-{day}", format="%Y-%m-%d", errors="coerce"
+                )
+            else:
+                date_converted = pd.to_datetime(date_value, errors="coerce")
         else:
-            date_converted = pd.to_datetime(date_value)
+            date_converted = pd.to_datetime(date_value, errors="coerce")
+
+        if pd.isna(date_converted):
+            return None
         return f"{date_converted.day}.{date_converted.strftime('%b')}"
     except Exception as e:
-        print(f"Error during value conversion '{date_value}': {e}")
+        print(f"⚠️ Error converting '{date_value}': {e}")
         return None
 
 # ======== Format ETA/ATA, ETB, ETD ========
-for row in range(start_row, data_count + 1):
-    try:
-        eta = ws[f'J{row}'].value
-        etb = ws[f'L{row}'].value
-        etd = ws[f'N{row}'].value
-
-        if eta:
-            ws[f'K{row}'] = convert_to_date_format(eta)
-        if etb:
-            ws[f'M{row}'] = convert_to_date_format(etb)
-        if etd:
-            ws[f'O{row}'] = convert_to_date_format(etd)
-    except Exception as e:
-        print(f"Error converting dates at row {row}: {e}")
+for row in range(start_row, end_row + 1):
+    for src_col, tgt_col in zip(['J', 'L', 'N'], ['K', 'M', 'O']):
+        val = ws[f"{src_col}{row}"].value
+        if val:
+            ws[f"{tgt_col}{row}"] = convert_to_date_format(val)
 
 # ======== Format Lay and Can ========
-for row in range(start_row, data_count + 1):
-    try:
-        lay = ws[f'BK{row}'].value
-        can = ws[f'BM{row}'].value
-
-        if lay:
-            ws[f'BL{row}'] = convert_to_date_format(lay)
-        if can:
-            ws[f'BN{row}'] = convert_to_date_format(can)
-    except Exception as e:
-        print(f"Error converting Lay/Can at row {row}: {e}")
+for row in range(start_row, end_row + 1):
+    for src_col, tgt_col in zip(['BK', 'BM'], ['BL', 'BN']):
+        val = ws[f"{src_col}{row}"].value
+        if val:
+            ws[f"{tgt_col}{row}"] = convert_to_date_format(val)
 
 # ======== No Mahakam based on Load Port ========
 no_mahakam = 1
-for row in range(start_row, data_count + 1):
-    load_port = ws[f'I{row}'].value
-    if load_port == 'BoCT':
-        ws[f'B{row}'] = 0
-    elif load_port in ['SMD Anc', 'Bunyut']:
-        ws[f'B{row}'] = no_mahakam
-        no_mahakam += 1
+for row in range(start_row, end_row + 1):
+    load_port = ws[f"I{row}"].value
+    if load_port == "BoCT":
+        ws[f"B{row}"] = 0
     else:
-        ws[f'B{row}'] = no_mahakam
+        ws[f"B{row}"] = no_mahakam
         no_mahakam += 1
 
 # ======== Type of Shipment based on Name of Vessel ========
-for row in range(start_row, data_count + 1):
-    name_vessel = ws[f'F{row}'].value
+for row in range(start_row, end_row + 1):
+    name_vessel = ws[f"F{row}"].value
     if isinstance(name_vessel, str):
         vessel_upper = name_vessel.upper()
-        if vessel_upper.startswith('MV'):
-            ws[f'E{row}'] = 'Vessel'
-        elif vessel_upper.startswith('BG'):
-            ws[f'E{row}'] = 'Direct Shipment'
-        elif 'DUMP TRUCK' in vessel_upper:
-            ws[f'E{row}'] = 'Dump Truck'
-        else:
-            ws[f'E{row}'] = None
+        if vessel_upper.startswith("MV"):
+            ws[f"E{row}"] = "Vessel"
+        elif vessel_upper.startswith("BG"):
+            ws[f"E{row}"] = "Direct Shipment"
+        elif "DUMP TRUCK" in vessel_upper:
+            ws[f"E{row}"] = "Dump Truck"
 
 # ======== Fill columns for BoCT only ========
-data_b = data_summary  # assuming 'data_summary' is same as 'data_b'
 
-for row in range(start_row, data_count + 1):
-    load_port = ws[f'I{row}'].value
-    if load_port == 'BoCT':
-        try:
-            offset = row - start_row
-            ws[f'P{row}'] = data_b['IMM-WB.HCV.LS'].iloc[offset]
-            ws[f'Q{row}'] = data_b['IMM-WB.MCV.HS'].iloc[offset]
-            ws[f'R{row}'] = data_b['IMM-EB.MCV.LS'].iloc[offset]
-            ws[f'S{row}'] = data_b['IMM-EB.MCV.MS'].iloc[offset]
-            ws[f'T{row}'] = data_b['IMM-EB.MCV.HS'].iloc[offset]
-            ws[f'U{row}'] = data_b['TCM.HCV.LS'].iloc[offset]
-            ws[f'V{row}'] = data_b['TCM.HCV.HS'].iloc[offset]
-            ws[f'W{row}'] = data_b['TCM.LCV.MS.HA'].iloc[offset]
-            ws[f'X{row}'] = data_b['BEK.MCV.LS'].iloc[offset]
-            ws[f'Y{row}'] = data_b['BEK.HCV.MS'].iloc[offset]
-            ws[f'Z{row}'] = data_b['JBG'].iloc[offset]
-            ws[f'AA{row}'] = data_b['GPK'].iloc[offset]
-            ws[f'AB{row}'] = data_b['TIS'].iloc[offset]
+for i, row_data in data_summary.iloc[: end_row - start_row + 1].iterrows():
+    row = start_row + i
+    load_port = ws[f"I{row}"].value
+    if load_port != "BoCT":
+        continue
 
-            # Third Party
-            ws[f'AC{row}'] = data_b['EBH.HCV'].iloc[offset]
-            ws[f'AE{row}'] = data_b['KMIA.MCV.LS'].iloc[offset]
-            ws[f'AF{row}'] = data_b['BBE.MCV'].iloc[offset]
-            ws[f'AG{row}'] = data_b['MBL.MCV'].iloc[offset]
-            ws[f'AH{row}'] = data_b['MBL.56.MCV'].iloc[offset]
-            ws[f'AJ{row}'] = data_b['EMJ.MCV'].iloc[offset]
-            ws[f'AL{row}'] = data_b['KBM.MCV'].iloc[offset]
-            ws[f'AM{row}'] = data_b['IKJ.MCV'].iloc[offset]
-            ws[f'AN{row}'] = data_b['MKE.LCV'].iloc[offset]
-            ws[f'AQ{row}'] = data_b['KJA.LCV.LS'].iloc[offset]
-            ws[f'AS{row}'] = data_b['DMP.LCV'].iloc[offset] 
-            ws[f'AT{row}'] = data_b['MCM.LCV'].iloc[offset]
-            ws[f'AU{row}'] = data_b['BMM.LCV'].iloc[offset]
-            ws[f'AW{row}'] = data_b['BBA.LCV'].iloc[offset]
-            ws[f'AX{row}'] = data_b['MML.LCV'].iloc[offset]
-            ws[f'BA{row}'] = data_b['KPM.LCV'].iloc[offset]
-            ws[f'BB{row}'] = data_b['KJM.LCV'].iloc[offset]
-            ws[f'BF{row}'] = data_b['BUM.LCV'].iloc[offset]
-            ws[f'BG{row}'] = data_b['BISM.LCV'].iloc[offset]
-        except IndexError:
-            print(f"There is not enough data to fill the column in the row {row}.")
+    mapping_boCT = {
+        'P': 'IMM-WB.HCV.LS',
+        'Q': 'IMM-WB.MCV.HS',
+        'R': 'IMM-EB.MCV.LS',
+        'S': 'IMM-EB.MCV.MS',
+        'T': 'IMM-EB.MCV.HS',
+        'U': 'TCM.HCV.LS',
+        'V': 'TCM.HCV.HS',
+        'W': 'TCM.LCV.MS.HA',
+        'X': 'BEK.MCV.LS',
+        'Y': 'BEK.HCV.MS',
+        'Z': 'JBG',
+        'AA': 'GPK',
+        'AB': 'TIS',
+
+        #Third Party
+        'AC': 'EBH.HCV',
+        'AE': 'KMIA.MCV.LS',
+        'AF': 'BBE.MCV',
+        'AG': 'MBL.MCV',
+        'AH': 'MBL.56.MCV',
+        'AJ': 'EMJ.MCV',
+        'AL': 'KBM.MCV',
+        'AM': 'IKJ.MCV',
+        'AN': 'MKE.LCV',
+        'AQ': 'KJA.LCV.LS',
+        'AS': 'DMP.LCV',
+        'AT': 'MCM.LCV',
+        'AU': 'BMM.LCV',
+        'AW': 'BBA.LCV',
+        'AX': 'MML.LCV',
+        'BA': 'KPM.LCV',
+        'BB': 'KJM.LCV',
+        'BF': 'BUM.LCV',
+        'BG': 'BISM.LCV',
+    }
+
+    for excel_col, col_name in mapping_boCT.items():
+        if col_name in data_summary.columns:
+            ws[f"{excel_col}{row}"] = row_data[col_name]
 
 # ======== Save workbook ========
 wb.save(data_final_path)
-print("Excel file has been updated and saved.")
 wb.close()
+print("Excel file has been updated and saved.")
 
 print("The columns have been successfully updated and saved back to the same file... :)")
 

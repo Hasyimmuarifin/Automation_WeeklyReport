@@ -39,6 +39,8 @@ data_counts_and_tables: dict[str, tuple[int, str]] = {
     "Month 2":     (cfg["data_count_month2"], "TableMonth2"),
     "Month 3":     (cfg["data_count_month3"], "TableMonth3"),
     "Month 4":     (cfg["data_count_month4"], "TableMonth4"),
+    "Month 5":     (cfg["data_count_month5"], "TableMonth5"),
+    "Month 6":     (cfg["data_count_month6"], "TableMonth6"),
 }
 
 # Load the Excel workbook specified in the configuration
@@ -114,8 +116,13 @@ for sheet_name, (data_count, table_name) in data_counts_and_tables.items():
         # Delete excess rows from the bottom of the table's data section
         ws.delete_rows(end_row - rows_to_remove + 1, rows_to_remove)
 
-        # Update the new last row number of the table
-        new_end_row = end_row - rows_to_remove
+        # # Update the new last row number of the table
+        new_end_row = start_row + data_count - 1
+
+        # Kosongkan baris sisa setelah batas data
+        for row in ws.iter_rows(min_row=new_end_row+1, max_row=end_row, max_col=end_col):
+            for cell in row:
+                cell.value = None
         print(f"{rows_to_remove} line(s) removed from '{sheet_name}'.")
 
     # ── If current rows already matches desired data count ───────────────────
