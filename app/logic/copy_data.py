@@ -39,12 +39,12 @@ selected_week = json_data["selected_week"]
 
 # Mapping of columns for Penalty data based on the selected week
 week_column_map_penalty = {
-    'W0': 'AKC', 'W1': 'AKD', 'W2': 'AKE', 'W3': 'AKF', 'W4': 'AKG', 'W5': 'AKH'
+    'W0': 'AKC', 'W1': 'AKC', 'W2': 'AKC', 'W3': 'AKC', 'W4': 'AKC', 'W5': 'AKC'
 }
 
 # Mapping of columns for Demurrage data based on the selected week
 week_column_map_demurrage = {
-    'W0': 'AKK', 'W1': 'AKL', 'W2': 'AKM', 'W3': 'AKN', 'W4': 'AKO', 'W5': 'AKP'
+    'W0': 'AKK', 'W1': 'AKK', 'W2': 'AKK', 'W3': 'AKK', 'W4': 'AKK', 'W5': 'AKK'
 }
 
 # Function to copy weekly data to the output worksheet
