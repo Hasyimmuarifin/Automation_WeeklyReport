@@ -1,17 +1,17 @@
 {
-    "summary_file": "E:/Magang ITM Tbk/Automation/SystemAutomation_WeeklyReport/data/Summary 19 January R3.xlsx",
-    "final_file": "E:/Magang ITM Tbk/Automation/SystemAutomation_WeeklyReport/data/Draft_weeklyReport.xlsx",
+    "summary_file": "C:/Users/ADVAN/Downloads/26 January R2_Margin.xlsx",
+    "final_file": "E:/Magang ITM Tbk/Test_Automation_Weekly/Draft_weeklyReport_2.xlsx",
     "header_month1": 132,
     "header_month2": 260,
     "header_month3": 388,
     "header_month4": 516,
-    "header_month5": 0,
+    "header_month5": 643,
     "header_month6": 0,
-    "data_count_month1": 40,
-    "data_count_month2": 37,
-    "data_count_month3": 45,
-    "data_count_month4": 3,
-    "data_count_month5": 0,
+    "data_count_month1": 37,
+    "data_count_month2": 40,
+    "data_count_month3": 46,
+    "data_count_month4": 38,
+    "data_count_month5": 3,
     "data_count_month6": 0,
-    "selected_week": "W3"
+    "selected_week": "W4"
 }
